@@ -29,4 +29,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+   public function sendPasswordResetNotification($token)
+{
+    $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
+    $url = $frontendUrl . '/reset-password?token=' . $token . '&email=' . urlencode($this->email);
+
+    $this->notify(new \App\Notifications\ResetPasswordNotification($url));
+}
 }

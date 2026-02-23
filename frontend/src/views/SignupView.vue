@@ -1,42 +1,36 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
+
 const name = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
-const loading = ref(false)
-const error = ref('')
 
 const handleSignup = async () => {
   if (!name.value || !email.value || !password.value || !confirmPassword.value) {
-    error.value = 'Please fill in all fields'
+    authStore.error = 'Please fill in all fields'
     return
   }
 
   if (password.value !== confirmPassword.value) {
-    error.value = 'Passwords do not match'
+    authStore.error = 'Passwords do not match'
     return
   }
 
   if (password.value.length < 8) {
-    error.value = 'Password must be at least 8 characters'
+    authStore.error = 'Password must be at least 8 characters'
     return
   }
 
-  loading.value = true
-  error.value = ''
-
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    localStorage.setItem('auth_token', 'demo_token_' + Date.now())
+  const success = await authStore.register(name.value, email.value, password.value, confirmPassword.value)
+  
+  if (success) {
     router.push({ name: 'home' })
-  } catch (err) {
-    error.value = 'Signup failed. Please try again.'
-  } finally {
-    loading.value = false
   }
 }
 
@@ -106,10 +100,10 @@ const handleBackToLanding = () => {
             />
           </div>
 
-          <div v-if="error" class="error-message">{{ error }}</div>
+          <div v-if="authStore.error" class="error-message">{{ authStore.error }}</div>
 
-          <button type="submit" class="btn-submit" :disabled="loading">
-            {{ loading ? 'Creating Account...' : 'Create Account' }}
+          <button type="submit" class="btn-submit" :disabled="authStore.loading">
+            {{ authStore.loading ? 'Creating Account...' : 'Create Account' }}
           </button>
         </form>
 

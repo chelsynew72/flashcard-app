@@ -1,30 +1,24 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
+
 const email = ref('')
 const password = ref('')
-const loading = ref(false)
-const error = ref('')
 
 const handleLogin = async () => {
   if (!email.value || !password.value) {
-    error.value = 'Please fill in all fields'
+    authStore.error = 'Please fill in all fields'
     return
   }
 
-  loading.value = true
-  error.value = ''
-
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    localStorage.setItem('auth_token', 'demo_token_' + Date.now())
+  const success = await authStore.login(email.value, password.value)
+  
+  if (success) {
     router.push({ name: 'home' })
-  } catch (err) {
-    error.value = 'Login failed. Please try again.'
-  } finally {
-    loading.value = false
   }
 }
 
@@ -71,10 +65,10 @@ const handleBackToLanding = () => {
             />
           </div>
 
-          <div v-if="error" class="error-message">{{ error }}</div>
+          <div v-if="authStore.error" class="error-message">{{ authStore.error }}</div>
 
-          <button type="submit" class="btn-submit" :disabled="loading">
-            {{ loading ? 'Logging in...' : 'Log In' }}
+          <button type="submit" class="btn-submit" :disabled="authStore.loading">
+            {{ authStore.loading ? 'Logging in...' : 'Log In' }}
           </button>
         </form>
 
