@@ -1,140 +1,170 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
-import { RouterView, useRoute, useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from './stores/auth'
 
-const router = useRouter()
 const route = useRoute()
-const activeTab = ref('home')
+const router = useRouter()
+const auth = useAuthStore()
 
-const tabs = [
-  { id: 'home', label: 'HOME', icon: '🏠' },
-  { id: 'library', label: 'LIBRARY', icon: '📚' },
-  { id: 'discover', label: 'DISCOVER', icon: '🔍' },
-  { id: 'stats', label: 'STATS', icon: '📊' },
-  { id: 'profile', label: 'PROFILE', icon: '👤' },
+const authPages = ['/', '/login', '/register', '/forgot-password', '/reset-password']
+const showNav = computed(() => !authPages.includes(route.path))
+
+const navItems = [
+  { label: 'Dashboard', icon: '🏠', path: '/dashboard' },
+  { label: 'My Decks', icon: '📚', path: '/decks' },
+  { label: 'Explore', icon: '🔍', path: '/explore' },
+  { label: 'Settings', icon: '⚙️', path: '/profile' },
 ]
 
-const showBottomNav = computed(() => {
-  return route.meta.requiresAuth === true
-})
-
-watch(
-  () => route.name,
-  (newRoute) => {
-    if (newRoute === 'home' || newRoute === 'library' || newRoute === 'discover' || newRoute === 'stats' || newRoute === 'profile') {
-      activeTab.value = newRoute
-    }
-  },
-  { immediate: true },
-)
-
-const navigateTo = (tabId: string) => {
-  activeTab.value = tabId
-  router.push({ name: tabId })
+const handleLogout = async () => {
+  await auth.logout()
+  router.push('/login')
 }
 </script>
 
 <template>
-  <div class="app-container">
-    <div class="app-content">
-      <RouterView />
-    </div>
+  <div class="app-shell">
+    <aside v-if="showNav" class="sidebar">
+      <div class="sidebar-logo">
+        <span>🃏</span>
+        <span class="logo-text">FlashcardApp</span>
+      </div>
+      <nav class="sidebar-nav">
+        <RouterLink
+          v-for="item in navItems"
+          :key="item.path"
+          :to="item.path"
+          class="nav-link"
+        >
+          <span class="nav-icon">{{ item.icon }}</span>
+          <span>{{ item.label }}</span>
+        </RouterLink>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="nav-link logout" @click="handleLogout">
+          <span class="nav-icon">🚪</span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
 
-    <nav v-if="showBottomNav" class="bottom-nav">
-      <button
-        v-for="tab in tabs"
-        :key="tab.id"
-        class="nav-item"
-        :class="{ active: activeTab === tab.id }"
-        @click="navigateTo(tab.id)"
-      >
-        <span class="nav-icon">{{ tab.icon }}</span>
-        <span class="nav-label">{{ tab.label }}</span>
-      </button>
-    </nav>
+    <main class="main" :class="{ 'with-sidebar': showNav }">
+      <div class="page-content">
+        <RouterView />
+      </div>
+    </main>
   </div>
 </template>
 
-<style scoped>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+<style>
+@import './assets/main.css';
 
-html,
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  height: 100%;
-  width: 100%;
+  background: #0a1f1c;
+  color: #e8f5f0;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  min-height: 100vh;
 }
 
-.app-container {
+.app-shell {
   display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background-color: #0a1628;
-  color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
-    sans-serif;
+  min-height: 100vh;
 }
 
-.app-content {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: 80px;
-}
-
-.bottom-nav ~ .app-content {
-  padding-bottom: 80px;
-}
-
-.app-container:not(:has(.bottom-nav)) .app-content {
-  padding-bottom: 0;
-}
-
-.bottom-nav {
+/* SIDEBAR */
+.sidebar {
   position: fixed;
-  bottom: 0;
+  top: 0;
   left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  height: 80px;
-  background-color: #0a1628;
-  border-top: 1px solid rgba(0, 255, 213, 0.1);
-  z-index: 100;
-}
-
-.nav-item {
+  width: 220px;
+  height: 100vh;
+  background: #0b201c;
+  border-right: 1px solid rgba(0,229,180,0.08);
   display: flex;
   flex-direction: column;
+  padding: 20px 12px;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.sidebar-logo {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 8px 16px;
-  background: none;
-  border: none;
-  color: #7a8fa3;
-  cursor: pointer;
-  transition: color 0.3s ease;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.nav-item:hover {
-  color: #a0b0c0;
-}
-
-.nav-item.active {
-  color: #00ffd5;
-}
-
-.nav-icon {
+  gap: 10px;
+  padding: 8px 12px 24px;
   font-size: 20px;
 }
 
-.nav-label {
-  white-space: nowrap;
+.logo-text {
+  font-size: 17px;
+  font-weight: 700;
+  color: #00e5b4;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #7aa898;
+  text-decoration: none;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+  background: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-link:hover {
+  background: rgba(0,229,180,0.06);
+  color: #e8f5f0;
+}
+
+.router-link-active.nav-link {
+  background: rgba(0,229,180,0.1);
+  color: #00e5b4;
+  border-color: rgba(0,229,180,0.15);
+  font-weight: 600;
+}
+
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+.sidebar-bottom {
+  border-top: 1px solid rgba(0,229,180,0.06);
+  padding-top: 12px;
+}
+
+.logout { color: #e87a7a !important; }
+.logout:hover { background: rgba(255,100,100,0.06) !important; }
+
+/* MAIN */
+.main {
+  flex: 1;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.main.with-sidebar {
+  margin-left: 220px;
+}
+
+.page-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 32px;
 }
 </style>

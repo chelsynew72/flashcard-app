@@ -1,85 +1,29 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import LandingView from '../views/LandingView.vue'
-import LoginView from '../views/LoginView.vue'
-import SignupView from '../views/SignupView.vue'
-import HomeView from '../views/HomeView.vue'
-import LibraryView from '../views/LibraryView.vue'
-import DiscoverView from '../views/DiscoverView.vue'
-import StatsView from '../views/StatsView.vue'
-import ProfileView from '../views/ProfileView.vue'
-
-const isAuthenticated = () => {
-  return !!localStorage.getItem('auth_token')
-}
+import { useAuthStore } from '../stores/auth'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
-    {
-      path: '/',
-      redirect: () => {
-        return isAuthenticated() ? '/home' : '/landing'
-      },
-    },
-    {
-      path: '/landing',
-      name: 'landing',
-      component: LandingView,
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: LoginView,
-    },
-    {
-      path: '/signup',
-      name: 'signup',
-      component: SignupView,
-    },
-    {
-      path: '/home',
-      name: 'home',
-      component: HomeView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/library',
-      name: 'library',
-      component: LibraryView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/discover',
-      name: 'discover',
-      component: DiscoverView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/stats',
-      name: 'stats',
-      component: StatsView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/profile',
-      name: 'profile',
-      component: ProfileView,
-      meta: { requiresAuth: true },
-    },
+    { path: '/', component: () => import('../pages/LandingPage.vue') },
+    { path: '/login', component: () => import('../pages/auth/LoginPage.vue') },
+    { path: '/register', component: () => import('../pages/auth/RegisterPage.vue') },
+    { path: '/forgot-password', component: () => import('../pages/auth/ForgotPasswordPage.vue') },
+    { path: '/reset-password', component: () => import('../pages/auth/ResetPasswordPage.vue') },
+    { path: '/dashboard', component: () => import('../pages/DashboardPage.vue'), meta: { requiresAuth: true } },
+    { path: '/decks', component: () => import('../pages/decks/DecksPage.vue'), meta: { requiresAuth: true } },
+    { path: '/decks/create', component: () => import('../pages/decks/CreateDeckPage.vue'), meta: { requiresAuth: true } },
+    { path: '/decks/:id', component: () => import('../pages/decks/DeckDetailPage.vue'), meta: { requiresAuth: true } },
+    { path: '/decks/:id/edit', component: () => import('../pages/decks/EditDeckPage.vue'), meta: { requiresAuth: true } },
+    { path: '/decks/:id/study', component: () => import('../pages/study/StudyPage.vue'), meta: { requiresAuth: true } },
+    { path: '/explore', component: () => import('../pages/ExplorePage.vue'), meta: { requiresAuth: true } },
+    { path: '/profile', component: () => import('../pages/ProfilePage.vue'), meta: { requiresAuth: true } },
   ],
 })
 
-router.beforeEach((to, from, next) => {
-  const requiresAuth = to.meta.requiresAuth
-  const authenticated = isAuthenticated()
-
-  if (requiresAuth && !authenticated) {
-    next({ name: 'landing' })
-  } else if ((to.name === 'login' || to.name === 'signup' || to.name === 'landing') && authenticated) {
-    next({ name: 'home' })
-  } else {
-    next()
-  }
+router.beforeEach((to) => {
+  const auth = useAuthStore()
+  if (to.meta.requiresAuth && !auth.isLoggedIn) return '/login'
+  if ((to.path === '/login' || to.path === '/register') && auth.isLoggedIn) return '/dashboard'
 })
 
 export default router
