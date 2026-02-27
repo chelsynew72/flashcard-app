@@ -1,65 +1,15 @@
-import axios from 'axios'
+import api from './index'
 
-const api = axios.create({
-  baseURL: '/api/v1',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
+export const register = (data: { name: string; email: string; password: string; password_confirmation: string }) =>
+  api.post('/auth/register', data)
 
-// Add auth token to requests if it exists
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
+export const login = (data: { email: string; password: string }) =>
+  api.post('/auth/login', data)
 
-// Handle auth errors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('auth_token')
-      window.location.href = '/login'
-    }
-    return Promise.reject(error)
-  }
-)
+export const logout = () => api.post('/auth/logout')
 
-export interface User {
-  id: number
-  name: string
-  email: string
-}
+export const forgotPassword = (email: string) =>
+  api.post('/auth/forgot-password', { email })
 
-export interface AuthResponse {
-  message: string
-  token: string
-  user: User
-}
-
-export const authApi = {
-  login: async (email: string, password: string): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('/auth/login', { email, password })
-    return response.data
-  },
-
-  register: async (name: string, email: string, password: string, passwordConfirmation: string): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('/auth/register', {
-      name,
-      email,
-      password,
-      password_confirmation: passwordConfirmation,
-    })
-    return response.data
-  },
-
-  logout: async (): Promise<void> => {
-    await api.post('/auth/logout')
-  },
-}
-
-export default api
-
+export const resetPassword = (data: { token: string; email: string; password: string; password_confirmation: string }) =>
+  api.post('/auth/reset-password', data)
