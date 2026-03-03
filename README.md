@@ -90,12 +90,11 @@ Alternatively, run both from the root:
 ---
 
 ## Live Demo 
-[Check out the Live Demo](https://flashcard-app-demo.com) (Placeholder)
+[Check out the Live Demo](https://flashcard-app-five-gamma.vercel.app/) (Placeholder)
 
 ---
 
 ## Contact Information 
-**Author:** Chelsy  
-**LinkedIn:** [linkedin.com/in/chelsy](https://linkedin.com/in/chelsy)  
-**GitHub:** [@chelsy](https://github.com/chelsy)  
-**Open to Work:** Currently seeking Full-stack Developer or Backend Engineer roles!
+**Author:** Ameah tem chelsy
+ 
+
