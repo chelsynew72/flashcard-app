@@ -1,48 +1,32 @@
-# frontend
+# Flashcard App - Frontend SPA 🚀
 
-This template should help get you started developing with Vue 3 in Vite.
+The interactive frontend for the Flashcard App, built with **Vue 3** and **Vite**. It provides a rich user experience for managing decks, generating AI-based content, and conducting study sessions.
 
-## Recommended IDE Setup
+## 1. Problem Statement 💡
+Static study materials can be boring and inefficient. This frontend is designed to provide an engaging, responsive, and intuitive interface that simplifies the process of creating and reviewing flashcards.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## 2. Technical Architecture 🏗️
+- **Framework:** Vue 3 (Composition API)
+- **State Management:** Pinia (Predictable and reactive data flow)
+- **Styling:** Tailwind CSS (Modern, utility-first UI)
+- **Tooling:** Vite, TypeScript, ESLint, Prettier
+- **Navigation:** Vue Router (SPA-based navigation)
 
-## Recommended Browser Setup
+## 3. Features ✨
+- **AI Card Generator UI:** Interactive topic-based generation with preview and selective save capabilities.
+- **Dynamic Study Mode:** Card-based review system with real-time feedback and rating.
+- **Deck Management:** Drag-and-drop-style interfaces for creating and organizing decks.
+- **Community Portal:** Discovery and cloning of public educational resources.
+- **Responsive Dashboard:** Personalized study metrics and deck statistics visualization.
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## 4. Challenges Faced 🧠
+- **Frontend Challenge:** Implementing the **AI generation workflow** where users can preview generated cards and selectively add them to new or existing decks required intricate **Pinia state management** and complex UI conditional rendering.
+- **UI Consistency:** Maintaining a consistent, modern design system while using Tailwind CSS required creating a set of reusable UI components and a strict color palette.
 
-## Type Support for `.vue` Imports in TS
+## 5. What I Learned 🎓
+- **Technical Lesson:** Advanced usage of **Vue 3 Composables** for sharing logic between different parts of the application (e.g., authentication status and study session timers).
+- **Workflow Lesson:** Implementing **TypeScript** across the frontend significantly reduced runtime errors and improved code documentation.
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+## 6. Installation ⚙️
+1. `npm install`
+2. `npm run dev`

@@ -228,11 +228,11 @@ const handleGoogleLogin = async () => {
 .google-btn {
   display: flex; align-items: center; justify-content: center; gap: 10px;
   width: 100%; padding: 13px;
-  background: #fff; border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,229,180,0.04); border: 1px solid rgba(0,229,180,0.12);
   border-radius: 12px; font-size: 15px; font-weight: 600;
-  color: #1a1a1a; cursor: pointer; transition: all 0.2s;
+  color: #8ab8a8; cursor: pointer; transition: all 0.2s;
 }
-.google-btn:hover { background: #f5f5f5; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+.google-btn:hover { border-color: rgba(0,229,180,0.3); color: #e8f5f0; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,229,180,0.1); }
 
 /* Divider */
 .divider { display: flex; align-items: center; gap: 14px; color: #4a7a68; font-size: 13px; }
