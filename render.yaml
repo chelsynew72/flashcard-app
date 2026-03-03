@@ -1,6 +1,0 @@
-services:
-  - type: web
-    name: flashcard-backend
-    runtime: docker
-    dockerfilePath: ./Dockerfile
-    dockerContext: .

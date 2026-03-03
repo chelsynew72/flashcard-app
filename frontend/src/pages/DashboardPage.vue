@@ -205,7 +205,7 @@ onMounted(async () => {
         <div class="card-header">
           <div class="suggest-title-row">
             <h3 class="card-title">🤖 Suggested for You</h3>
-            <span class="ai-chip">✨ AI Powered</span>
+            <span class="ai-chip"> AI Powered</span>
           </div>
           <button class="see-all" @click="router.push('/explore')">See All</button>
         </div>
