@@ -3,11 +3,14 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { getDashboard } from '../api/dashboard'
+import api from '../api'
 import type { DashboardData } from '../types'
 
 const router = useRouter()
 const auth = useAuthStore()
 const data = ref<DashboardData | null>(null)
+const suggestions = ref<any[]>([])
+const suggestReason = ref('')
 const loading = ref(true)
 
 const greeting = () => {
@@ -29,6 +32,15 @@ onMounted(async () => {
     console.error(e)
   } finally {
     loading.value = false
+  }
+
+  // Load AI suggestions separately so they don't block the dashboard
+  try {
+    const sugRes = await api.get('/ai/suggestions')
+    suggestions.value = sugRes.data.suggestions
+    suggestReason.value = sugRes.data.reason
+  } catch (e) {
+    console.error('Suggestions failed:', e)
   }
 })
 </script>
@@ -188,6 +200,38 @@ onMounted(async () => {
         </div>
       </div>
 
+      <!-- AI SUGGESTIONS -->
+      <div class="card suggestions-card" v-if="suggestions.length > 0">
+        <div class="card-header">
+          <div class="suggest-title-row">
+            <h3 class="card-title">🤖 Suggested for You</h3>
+            <span class="ai-chip">✨ AI Powered</span>
+          </div>
+          <button class="see-all" @click="router.push('/explore')">See All</button>
+        </div>
+        <p class="suggest-reason">{{ suggestReason }}</p>
+        <div class="recent-grid">
+          <div
+            v-for="deck in suggestions"
+            :key="deck.id"
+            class="recent-card suggest-item"
+            @click="router.push('/explore')"
+          >
+            <div class="recent-top">
+              <h4>{{ deck.title }}</h4>
+              <span class="chip">{{ deck.cards_count }} cards</span>
+            </div>
+            <p class="recent-desc">{{ deck.description || 'No description' }}</p>
+            <div class="tags">
+              <span v-for="tag in deck.tags" :key="tag.id" class="tag">{{ tag.name }}</span>
+            </div>
+            <div class="recent-btns" style="margin-top: 4px;">
+              <button class="clone-btn" @click.stop="router.push('/explore')">View in Explore →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </template>
   </div>
 </template>
@@ -195,28 +239,19 @@ onMounted(async () => {
 <style scoped>
 .dashboard { display: flex; flex-direction: column; gap: 20px; }
 
-/* Loading */
 .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; gap: 16px; color: #8ab8a8; }
 .spinner { width: 36px; height: 36px; border: 3px solid rgba(0,229,180,0.15); border-top-color: #00e5b4; border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Header */
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
 .greeting { font-size: 26px; font-weight: 800; color: #fff; letter-spacing: -0.5px; margin-bottom: 4px; }
 .date { font-size: 13px; color: #7aa898; }
 .new-btn { background: #00e5b4; color: #0a1f1c; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
 .new-btn:hover { background: #00c896; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,229,180,0.25); }
 
-/* 2-col rows */
 .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-/* Due card */
-.due-card {
-  background: linear-gradient(135deg, rgba(0,229,180,0.1), rgba(0,180,140,0.04));
-  border: 1px solid rgba(0,229,180,0.2);
-  border-radius: 16px; padding: 24px;
-  display: flex; flex-direction: column; gap: 16px;
-}
+.due-card { background: linear-gradient(135deg, rgba(0,229,180,0.1), rgba(0,180,140,0.04)); border: 1px solid rgba(0,229,180,0.2); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
 .due-top { display: flex; justify-content: space-between; align-items: flex-start; }
 .section-label { font-size: 10px; letter-spacing: 1.5px; color: #7aa898; font-weight: 600; margin-bottom: 8px; }
 .due-number { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
@@ -228,13 +263,7 @@ onMounted(async () => {
 .start-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,229,180,0.3); }
 .start-btn:disabled { opacity: 0.45; cursor: default; }
 
-/* Streak */
-.streak-card {
-  background: linear-gradient(135deg, rgba(255,128,0,0.08), rgba(200,80,0,0.03));
-  border: 1px solid rgba(255,128,0,0.18);
-  border-radius: 16px; padding: 24px;
-  display: flex; flex-direction: column; justify-content: space-between;
-}
+.streak-card { background: linear-gradient(135deg, rgba(255,128,0,0.08), rgba(200,80,0,0.03)); border: 1px solid rgba(255,128,0,0.18); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; }
 .streak-top { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
 .fire { font-size: 48px; }
 .streak-num { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; }
@@ -243,21 +272,18 @@ onMounted(async () => {
 .dot { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,128,0,0.15); }
 .dot.active { background: #ff8c00; }
 
-/* Stats */
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .stat-card { background: #0d2420; border: 1px solid rgba(0,229,180,0.07); border-radius: 14px; padding: 20px; text-align: center; transition: all 0.2s; }
 .stat-card:hover { border-color: rgba(0,229,180,0.18); transform: translateY(-2px); }
 .stat-val { font-size: 30px; font-weight: 800; color: #fff; letter-spacing: -1px; margin-bottom: 4px; }
 .stat-lbl { font-size: 12px; color: #7aa898; font-weight: 500; }
 
-/* Generic card */
 .card { background: #0d2420; border: 1px solid rgba(0,229,180,0.07); border-radius: 16px; padding: 24px; }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .card-title { font-size: 16px; font-weight: 700; color: #fff; }
 .see-all { background: none; border: none; color: #7aa898; font-size: 13px; cursor: pointer; transition: color 0.2s; }
 .see-all:hover { color: #00e5b4; }
 
-/* Chart */
 .chart { display: flex; align-items: flex-end; gap: 6px; height: 130px; margin-top: 16px; }
 .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .bar-wrap { flex: 1; display: flex; align-items: flex-end; width: 100%; }
@@ -266,27 +292,22 @@ onMounted(async () => {
 .bar-day { font-size: 11px; color: #7aa898; }
 .bar-num { font-size: 10px; color: #4a7a68; }
 
-/* Empty */
 .empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 32px 0; color: #7aa898; font-size: 14px; }
 .empty span { font-size: 28px; }
 .empty.tall { padding: 48px 0; }
 
-/* Due list */
 .due-list { display: flex; flex-direction: column; gap: 10px; }
 .due-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: rgba(0,229,180,0.03); border: 1px solid rgba(0,229,180,0.07); border-radius: 10px; }
 .due-title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; }
 
-/* Tags */
 .tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .tag { background: rgba(0,229,180,0.1); border: 1px solid rgba(0,229,180,0.15); color: #00e5b4; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
 
-/* Buttons */
 .study-btn { background: #00e5b4; color: #0a1f1c; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
 .study-btn:hover { background: #00c896; transform: translateY(-1px); }
 .view-btn { background: rgba(0,229,180,0.07); color: #7aa898; border: 1px solid rgba(0,229,180,0.12); padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
 .view-btn:hover { color: #00e5b4; border-color: rgba(0,229,180,0.25); }
 
-/* Recent decks */
 .recent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 4px; }
 .recent-card { background: rgba(0,229,180,0.03); border: 1px solid rgba(0,229,180,0.07); border-radius: 12px; padding: 18px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 8px; }
 .recent-card:hover { border-color: rgba(0,229,180,0.2); transform: translateY(-2px); }
@@ -296,4 +317,13 @@ onMounted(async () => {
 .recent-desc { font-size: 12px; color: #7aa898; line-height: 1.5; }
 .recent-btns { display: flex; gap: 8px; margin-top: 4px; }
 .recent-btns .study-btn, .recent-btns .view-btn { flex: 1; text-align: center; }
+
+/* AI Suggestions */
+.suggestions-card { border-color: rgba(0,229,180,0.12); }
+.suggest-title-row { display: flex; align-items: center; gap: 10px; }
+.ai-chip { background: linear-gradient(135deg, rgba(0,229,180,0.15), rgba(0,200,150,0.1)); border: 1px solid rgba(0,229,180,0.3); color: #00e5b4; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+.suggest-reason { font-size: 13px; color: #7aa898; margin-bottom: 16px; margin-top: -12px; }
+.suggest-item { border-color: rgba(0,229,180,0.1); }
+.clone-btn { flex: 1; width: 100%; background: rgba(0,229,180,0.08); color: #00e5b4; border: 1px solid rgba(0,229,180,0.2); padding: 8px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.clone-btn:hover { background: rgba(0,229,180,0.15); }
 </style>

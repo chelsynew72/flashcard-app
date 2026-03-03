@@ -17,6 +17,7 @@ const router = createRouter({
     { path: '/decks/:id/study', component: () => import('../pages/study/StudyPage.vue'), meta: { requiresAuth: true } },
     { path: '/explore', component: () => import('../pages/ExplorePage.vue'), meta: { requiresAuth: true } },
     { path: '/profile', component: () => import('../pages/ProfilePage.vue'), meta: { requiresAuth: true } },
+    { path: '/ai-generate', component: () => import('../pages/AiGeneratePage.vue'), meta: { requiresAuth: true } },
   ],
 })
 
