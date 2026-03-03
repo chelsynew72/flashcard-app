@@ -2,12 +2,5 @@ services:
   - type: web
     name: flashcard-backend
     runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
-    envVars:
-      - key: APP_NAME
-        value: FlashcardApp
-      - key: APP_ENV
-        value: production
-      - key: APP_DEBUG
-        value: false
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
