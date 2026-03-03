@@ -14,3 +14,9 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+node_modules
+package.json
+vite.config.js
+node_modules
+package.json
+vite.config.js
