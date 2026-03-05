@@ -18,16 +18,14 @@ onMounted(async () => {
     return
   }
 
-  // Save token and user
+  // Save token and user FIRST before anything else
   localStorage.setItem('token', token)
   localStorage.setItem('user', JSON.stringify({ name, email }))
   auth.token = token
   auth.user = { name, email } as any
 
-  // Fetch full user profile from API
-  await auth.fetchUser()
-
-  // Use replace instead of push so the callback URL is removed from history
+  // Skip fetchUser — just go to dashboard directly
+  // fetchUser can fail if the token format differs
   router.replace('/dashboard')
 })
 </script>
