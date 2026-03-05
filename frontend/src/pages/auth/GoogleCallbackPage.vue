@@ -1,33 +1,19 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '../../stores/auth'
+// Use vanilla JS instead of Vue Router to handle the redirect
+// This runs immediately, before Vue fully mounts
+const params = new URLSearchParams(window.location.search)
+const token = params.get('token')
+const name = params.get('name') || ''
+const email = params.get('email') || ''
+const error = params.get('error')
 
-const router = useRouter()
-const route = useRoute()
-const auth = useAuthStore()
-
-onMounted(async () => {
-  const token = route.query.token as string
-  const name = route.query.name as string
-  const email = route.query.email as string
-  const error = route.query.error as string
-
-  if (error || !token) {
-    router.replace('/login?error=google_failed')
-    return
-  }
-
-  // Save token and user FIRST before anything else
+if (error || !token) {
+  window.location.replace('/login?error=google_failed')
+} else {
   localStorage.setItem('token', token)
   localStorage.setItem('user', JSON.stringify({ name, email }))
-  auth.token = token
-  auth.user = { name, email } as any
-
-  // Skip fetchUser — just go to dashboard directly
-  // fetchUser can fail if the token format differs
-  router.replace('/dashboard')
-})
+  window.location.replace('/dashboard')
+}
 </script>
 
 <template>
