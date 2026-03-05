@@ -14,23 +14,21 @@ onMounted(async () => {
   const error = route.query.error as string
 
   if (error || !token) {
-    router.push('/login?error=google_failed')
+    router.replace('/login?error=google_failed')
     return
   }
 
-  // Save token
+  // Save token and user
   localStorage.setItem('token', token)
+  localStorage.setItem('user', JSON.stringify({ name, email }))
   auth.token = token
+  auth.user = { name, email } as any
 
-  // Save user
-  const userData = { name, email }
-  localStorage.setItem('user', JSON.stringify(userData))
-  auth.user = userData as any
-
-  // Fetch full user profile
+  // Fetch full user profile from API
   await auth.fetchUser()
 
-  router.push('/dashboard')
+  // Use replace instead of push so the callback URL is removed from history
+  router.replace('/dashboard')
 })
 </script>
 
