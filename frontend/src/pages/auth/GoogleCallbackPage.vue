@@ -18,10 +18,17 @@ onMounted(async () => {
     return
   }
 
-  // Save token and user to store
+  // Save token
   localStorage.setItem('token', token)
   auth.token = token
-  auth.user = { name, email } as any
+
+  // Save user
+  const userData = { name, email }
+  localStorage.setItem('user', JSON.stringify(userData))
+  auth.user = userData as any
+
+  // Fetch full user profile
+  await auth.fetchUser()
 
   router.push('/dashboard')
 })
@@ -37,14 +44,10 @@ onMounted(async () => {
 <style scoped>
 .callback-page {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  background: #0a1f1c;
-  color: #7aa898;
-  font-size: 15px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px; background: #0a1f1c;
+  color: #7aa898; font-size: 15px;
 }
 .spinner {
   width: 40px; height: 40px;
