@@ -5,7 +5,6 @@ import { useAuthStore } from '../../stores/auth'
 
 const router = useRouter()
 const auth = useAuthStore()
-
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
@@ -23,7 +22,6 @@ const handleLogin = async () => {
   } finally {
     loading.value = false
   }
-}
 }
 </script>
 

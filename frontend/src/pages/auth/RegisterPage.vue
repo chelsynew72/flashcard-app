@@ -36,7 +36,6 @@ const handleRegister = async () => {
     loading.value = false
   }
 }
-}
 </script>
 
 <template>
