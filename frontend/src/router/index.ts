@@ -22,7 +22,6 @@ const router = createRouter({
 })
 router.beforeEach((to) => {
   const auth = useAuthStore()
-  if (to.path === '/auth/google/callback') return true
   if (to.meta.requiresAuth && !auth.isLoggedIn) return '/login'
   if ((to.path === '/login' || to.path === '/register') && auth.isLoggedIn) return '/dashboard'
 })
